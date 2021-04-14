@@ -1,28 +1,34 @@
-setwd("/Users/bellapatel/Documents/GitHub/Stat-385-final-project")
+setwd("/Users/bellapatel/stat385/")
 
 first <- read.csv("Dfirst.csv")
 second <- read.csv("Dsecond.csv")
 third <- read.csv("Dthird.csv")
 
-unique(first$target) # still, car, train, bus, walking
-unique(as.integer(first$target)) # 3 2 4 1 5
+which(colnames(third)%in%(colnames(first)))
+which(colnames(third)%in%(colnames(second)))
 
-colnames(first)
-colnames(second)
-colnames(third)
+total <- cbind(first, second[,c(6,7,8,9,seq(14,29))], third[,c(seq(34, 37))])
+colnames(total)
 
-first$target <- as.integer(first$target)
-cor(first$target, first) # highest - android.sensor.gyroscope.mean: 0.4580953
+unique(total$target) # still, car, train, bus, walking
+unique(as.integer(total$target)) # 3 2 4 1 5
 
-second$target <- as.integer(second$target)
-cor(second$target, second) # highest - android.sensor.linear_acceleration.mean: 0.4462201
+cor(as.integer(total$target), total[,-c(14)])
 
-third$target <- as.integer(third$target)
-cor(third$target, third) # highest - android.sensor.gyroscope.mean: 0.4580953 
+plot(total$target, total$speed.mean)
 
+
+# logistic regression
+gyroscope <-as.double(total[,7]) # android.sensor.gyroscope.mean
+acceleration <-as.double(total[,23]) # android.sensor.linear_acceleration.mean
+target <- as.factor(total[,14])
+logitreg <-glm(target~gyroscope+acceleration,family="binomial")
+summary(logitreg)
+with(summary(logitreg), 1 - deviance/null.deviance)
+# measure the ratio of the deviance in your model to the null; R-squared is "goodness of fit"; how much of your data is explained by the data.
 
 
 # logistic regression
 # support vector machine
-# clafficiation trees
+# classificiation trees
 # k means / k nearest neighborhoods
