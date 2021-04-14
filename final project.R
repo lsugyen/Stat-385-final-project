@@ -11,10 +11,16 @@ colnames(first)
 colnames(second)
 colnames(third)
 
-cor(as.integer(first$target), first$android.sensor.accelerometer.mean) # .390
-cor(as.integer(first$target), first$android.sensor.gyroscope.mean) # .458
-cor(as.integer(first$target), first$sound.mean) # .01
-cor(as.integer(first$target), first$android.sensor.gyroscope.max)
+first$target <- as.integer(first$target)
+cor(first$target, first) # highest - android.sensor.gyroscope.mean: 0.4580953
+
+second$target <- as.integer(second$target)
+cor(second$target, second) # highest - android.sensor.linear_acceleration.mean: 0.4462201
+
+third$target <- as.integer(third$target)
+cor(third$target, third) # highest - android.sensor.gyroscope.mean: 0.4580953 
+
+
 
 # logistic regression
 # support vector machine
