@@ -16,7 +16,7 @@ cor(as.integer(first$target), first$android.sensor.gyroscope.mean) # .458
 cor(as.integer(first$target), first$sound.mean) # .01
 cor(as.integer(first$target), first$android.sensor.gyroscope.max)
 
-# logistic regression
-# support vector machine
-# clafficiation trees
-# k means / k nearest neighborhoods
+# logistic regression (Bella)
+# support vector machine (Stephanie)
+# clafficiation trees (Albert)
+# k means / k nearest neighborhoods (Albert)

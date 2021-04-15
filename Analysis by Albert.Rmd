@@ -21,18 +21,56 @@ third <- third[,which(colnames(third)%in%colnames(second)==FALSE)]
 data = cbind(first,second,third)
 compact_data <- cbind(first[,c(1,2,6,10,14)],second[,c(1,5,9,13,17)])
 compact_data$speed.mean <- third[,1]
-#data = cbind(first[,c(1,2,6,10)],second[,c(6,10)])
 ```
+# Save abridged data into a csv
+```{r}
+write.csv(compact_data,"C:/Users/alber/Downloads/Classes/Stat 385/final project/compact_data.csv")
+```
+
+
+# Normalization Functions
+```{r}
+max_normalization<-function(x)
+{
+  norms<-(x-min(x))/(max(x)-min(x))
+  return(norms)
+}
+
+z_normalization <-function(x){
+  mu <- mean(x)
+  sigma <- sd(x)
+  z <- (x-mu)/sigma
+  return(z)
+}
+```
+```{r}
+max_normal <- compact_data
+max_normal[,-5] <- sapply(compact_data[,-5],max_normalization)
+
+z_normal <- compact_data
+z_normal[,-5] <- sapply(compact_data[,-5],z_normalization)
+```
+# Save normalized data to csv
+```{r}
+write.csv(max_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/max_normal.csv")
+write.csv(z_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/z_normal.csv")
+```
+
+
 
 ## Data set exploration
 
 ```{r}
 #boxplot(compact_data$android.sensor.game_rotation_vector.mean~compact_data$target)
-kmeans.model<-kmeans(compact_data[1:4000,-5],5)
-table(kmeans.model$cluster,compact_data$target[1:4000])
+kmeans.model<-kmeans(max_normal[1:4000,-5],5)
+table(kmeans.model$cluster,max_normal$target[1:4000])
+
+kmeans.model2<-kmeans(z_normal[1:4000,-5],5)
+table(kmeans.model2$cluster,z_normal$target[1:4000])
 ```
 ```{r}
-plot(compact_data[,c(9,11)], col=kmeans.model$cluster, main="K-means clustering")
+#plot(max_normal[,c(7:11)], col=kmeans.model$cluster, main="K-means clustering")
+#plot(z_normal[,c(9:11)], col=kmeans.model2$cluster, main="K-means clustering")
 ```
 # accelerator doesn't seem very useful
 ```{r}
