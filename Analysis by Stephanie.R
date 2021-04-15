@@ -6,6 +6,9 @@ first <- read.csv("Dfirst.csv") # Dfirst
 second <- read.csv("Dsecond.csv") # Dsecond 
 third <- read.csv("Dthird.csv") # Dthird 
 
+max_normal <- read.csv("max_normal.csv") # max_normal
+z_normal <- read.csv("z_normal.csv") # z_normal
+
 head(first)
 levels(as.factor(first$target))
 
@@ -21,6 +24,14 @@ compact_data$speed.mean <- third1[,1]
 head(compact_data)
 # target column moved to end of data frame 
 compact_data <- subset(compact_data, select=c(time:sound.mean, android.sensor.game_rotation_vector.mean:speed.mean, target))
+
+head(max_normal)
+# target column moved to end of data frame and removed first column
+max_normal <- subset(max_normal, select=c(time:sound.mean, android.sensor.game_rotation_vector.mean:speed.mean, target))
+
+head(z_normal)
+# target column moved to end of data frame and removed first column
+z_normal <- subset(z_normal, select=c(time:sound.mean, android.sensor.game_rotation_vector.mean:speed.mean, target))
 
 
 # Correlation between features and targets 
@@ -142,6 +153,37 @@ cor(compact_data[1:(length(compact_data)-1)], as.integer(factor(compact_data$tar
 # android.sensor.accelerometer.mean, android.sensor.gyroscope.mean android.sensor.gyroscope_uncalibrated.mean  and android.sensor.linear_acceleration.mean   
 # have strong positive correlation 
 
+# Max Normal 
+cor(max_normal[1:(length(max_normal)-1)], as.integer(factor(max_normal$target)))
+# time                                        0.07238531 (weak positive correlation)
+# android.sensor.accelerometer.mean           0.39077663 (strong positive correlation)
+# android.sensor.gyroscope.mean               0.45809533 (strong positive correlation)
+# sound.mean                                  0.01002905 (weak positive correlation)
+# android.sensor.game_rotation_vector.mean    0.03772740 (weak positive correlation)
+# android.sensor.gyroscope_uncalibrated.mean  0.43973652 (strong positive correlation)
+# android.sensor.linear_acceleration.mean     0.44622005 (strong positive correlation)
+# android.sensor.orientation.mean             0.03456306 (weak positive correlation)
+# android.sensor.rotation_vector.mean         0.06302674 (weak positive correlation)
+# speed.mean                                 -0.15046229 (weak negative correlation)
+
+# android.sensor.accelerometer.mean, android.sensor.gyroscope.mean android.sensor.gyroscope_uncalibrated.mean  and android.sensor.linear_acceleration.mean   
+# have strong positive correlation 
+
+# Z Normal 
+cor(z_normal[1:(length(z_normal)-1)], as.integer(factor(z_normal$target)))
+# time                                        0.07238531 (weak positive correlation)
+# android.sensor.accelerometer.mean           0.39077663 (strong positive correlation)
+# android.sensor.gyroscope.mean               0.45809533 (strong positive correlation)
+# sound.mean                                  0.01002905 (weak positive correlation)
+# android.sensor.game_rotation_vector.mean    0.03772740 (weak positive correlation)
+# android.sensor.gyroscope_uncalibrated.mean  0.43973652 (strong positive correlation)
+# android.sensor.linear_acceleration.mean     0.44622005 (strong positive correlation)
+# android.sensor.orientation.mean             0.03456306 (weak positive correlation)
+# android.sensor.rotation_vector.mean         0.06302674 (weak positive correlation)
+# speed.mean                                 -0.15046229 (weak negative correlation)
+
+# android.sensor.accelerometer.mean, android.sensor.gyroscope.mean android.sensor.gyroscope_uncalibrated.mean  and android.sensor.linear_acceleration.mean   
+# have strong positive correlation 
 
 
 # Three stars (or asterisks) represent a highly significant p-value. Consequently, 
@@ -184,6 +226,20 @@ for (i in 1:(length(compact_data)-1)) {
 
 # time, sound, game.rotation.vector, orientation and rotation.vector seem different 
 
+# Max Normal  
+for (i in 1:(length(max_normal)-1)) {
+  boxplot(max_normal[,i]~as.factor(max_normal$target), main=names(max_normal[i]))
+}
+
+# time, sound, game.rotation.vector, orientation and rotation.vector seem different maybe speed.mean
+
+# Max Normal  
+for (i in 1:(length(z_normal)-1)) {
+  boxplot(z_normal[,i]~as.factor(z_normal$target), main=names(z_normal[i]))
+}
+
+# time, sound, game.rotation.vector, orientation and rotation.vector seem different maybe speed.mean
+
 
 # ANOVA 
 
@@ -217,7 +273,7 @@ pthird <- unlist(lapply(anovathird, function(x) x[[1]]$"Pr(>F)"[1]))
 pvaluesthird <- data.frame(Sensor = sub(' ~ target', '', names(pthird)), pvalue = pthird)
 pvaluesthird # p-values from anova test in data frame
 
-# Compact data third$target <- factor(third$target)
+# Compact data 
 compact_data$target <- factor(compact_data$target)
 formulae <- lapply(colnames(compact_data)[2:ncol(compact_data)-1], function(x) as.formula(paste0(x, " ~ target")))
 anovacompact_data <- lapply(formulae, function(x) summary(aov(x, data = compact_data)))
@@ -226,3 +282,29 @@ anovacompact_data # summary of anova test for each column with target
 pcompact_data <- unlist(lapply(anovacompact_data, function(x) x[[1]]$"Pr(>F)"[1]))
 pvaluescompact_data <- data.frame(Sensor = sub(' ~ target', '', names(pcompact_data)), pvalue = pcompact_data)
 pvaluescompact_data # p-values from anova test in data frame
+
+# Max Normal 
+max_normal$target <- factor(max_normal$target)
+formulae <- lapply(colnames(max_normal)[2:ncol(max_normal)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovamax_normal <- lapply(formulae, function(x) summary(aov(x, data = max_normal)))
+names(anovamax_normal) <- format(formulae)
+anovamax_normal # summary of anova test for each column with target
+pmax_normal <- unlist(lapply(anovamax_normal, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesmax_normal <- data.frame(Sensor = sub(' ~ target', '', names(pmax_normal)), pvalue = pmax_normal)
+pvaluesmax_normal # p-values from anova test in data frame
+
+# Z Normal 
+z_normal$target <- factor(z_normal$target)
+formulae <- lapply(colnames(z_normal)[2:ncol(z_normal)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovaz_normal <- lapply(formulae, function(x) summary(aov(x, data = z_normal)))
+names(anovaz_normal) <- format(formulae)
+anovaz_normal # summary of anova test for each column with target
+pz_normal <- unlist(lapply(anovaz_normal, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesz_normal <- data.frame(Sensor = sub(' ~ target', '', names(pz_normal)), pvalue = pz_normal)
+pvaluesz_normal# p-values from anova test in data frame
+
+
+# Support Vector Machine
+
+# Week 5-7 for referrence
+
