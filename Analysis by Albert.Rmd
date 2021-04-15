@@ -29,6 +29,7 @@ write.csv(compact_data,"C:/Users/alber/Downloads/Classes/Stat 385/final project/
 
 
 # Normalization Functions
+## Normalize by max or use z-score
 ```{r}
 max_normalization<-function(x)
 {
@@ -55,18 +56,23 @@ z_normal[,-5] <- sapply(compact_data[,-5],z_normalization)
 write.csv(max_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/max_normal.csv")
 write.csv(z_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/z_normal.csv")
 ```
-
+# Load normalized data
+```{r}
+z_normal<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/z_normal.csv",header=TRUE)
+max_normal<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/max_normal.csv",header=TRUE)
+```
 
 
 ## Data set exploration
 
 ```{r}
 #boxplot(compact_data$android.sensor.game_rotation_vector.mean~compact_data$target)
-kmeans.model<-kmeans(max_normal[1:4000,-5],5)
-table(kmeans.model$cluster,max_normal$target[1:4000])
+#kmeans.model<-kmeans(max_normal[1:4000,-5],5)
+#table(kmeans.model$cluster,max_normal$target[1:4000])
 
-kmeans.model2<-kmeans(z_normal[1:4000,-5],5)
+kmeans.model2<-kmeans(z_normal[1:4000,c(1,3,4,6,7,10,11)],5)
 table(kmeans.model2$cluster,z_normal$target[1:4000])
+table(z_normal$target[1:4000])
 ```
 ```{r}
 #plot(max_normal[,c(7:11)], col=kmeans.model$cluster, main="K-means clustering")
@@ -74,6 +80,6 @@ table(kmeans.model2$cluster,z_normal$target[1:4000])
 ```
 # accelerator doesn't seem very useful
 ```{r}
-boxplot(compact_data[,2]~compact_data$target)
+boxplot(z_normal[,4]~z_normal$target)
 ```
 
