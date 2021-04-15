@@ -12,6 +12,7 @@ colnames(first)
 colnames(second)
 colnames(third)
 
+#<<<<<<< HEAD
 cor(as.integer(factor(first$target)), first$android.sensor.accelerometer.mean) # 0.3908
 cor(as.integer(factor(first$target)), first$android.sensor.gyroscope.mean) # 0.4581
 cor(as.integer(factor(first$target)), first$sound.mean) # 0.0100
@@ -25,3 +26,14 @@ cor(as.integer(factor(first$target)), second$android.sensor.game_rotation_vector
 # support vector machine
 # clafficiation trees
 # k means / k nearest neighborhoods
+
+cor(as.integer(first$target), first$android.sensor.accelerometer.mean) # .390
+cor(as.integer(first$target), first$android.sensor.gyroscope.mean) # .458
+cor(as.integer(first$target), first$sound.mean) # .01
+cor(as.integer(first$target), first$android.sensor.gyroscope.max)
+
+# logistic regression (Bella)
+# support vector machine (Stephanie)
+# clafficiation trees (Albert)
+# k means / k nearest neighborhoods (Albert)
+
