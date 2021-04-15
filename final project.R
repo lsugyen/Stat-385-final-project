@@ -9,9 +9,6 @@ gyroscope <-as.double(normal[,3]) # android.sensor.gyroscope.mean
 acceleration <-as.double(normal[,2]) # android.sensor.linear_acceleration.mean
 speed <- as.double(normal[,11]) # speed.mean
 
-
-
-
 # combine several classes into two classes, then apply binary classification iteratively
 # create binary target
 
@@ -83,6 +80,32 @@ logisticwalking <-glm(target~acceleration+speed+gyroscope, family="binomial") #r
 # coef(logisticwalking)
 with(summary(logisticwalking), 1 - deviance/null.deviance)
 
-# predict(logisticwalking, newdata=data.frame(acceleration=.3, gyroscope=.5, speed = .5), type="response")
+see <- predict(logisticwalking, newdata=data.frame(acceleration=.3, gyroscope=.5, speed = .5), type="response")
+
+# for testing
+levels <- c("Walking", "Bus", "Still", "Train", "Car")
+
+for (row in 1:nrow(test))
+{
+  gyroscope1 <-as.double(test[,3][row]) # android.sensor.gyroscope.mean
+  acceleration1 <-as.double(test[,2][row]) # android.sensor.linear_acceleration.mean
+  speed1 <- as.double(test[,11][row])
+
+  walkingprob <- predict(logisticwalking, newdata=data.frame(acceleration=acceleration1, gyroscope=gyroscope1, speed = speed1), type="response")
+  busprob <- predict(logisticbus, newdata=data.frame(acceleration=acceleration1, gyroscope=gyroscope1, speed = speed1), type="response")
+  stillprob <- predict(logisticstill, newdata=data.frame(acceleration=acceleration1, gyroscope=gyroscope1, speed = speed1), type="response")
+  trainprob <- predict(logistictrain, newdata=data.frame(acceleration=acceleration1, gyroscope=gyroscope1, speed = speed1), type="response")
+  carprob <- predict(logisticcar, newdata=data.frame(acceleration=acceleration1, gyroscope=gyroscope1, speed = speed1), type="response")
+  
+  # print(max(walkingprob, busprob, stillprob, trainprob, carprob))
+  predictionprobs <- c(walkingprob, busprob, stillprob, trainprob, carprob)
+  # print(predictionprobs)
+  print(levels[which.max(predictionprobs)])
+}
+
+test$target
+
+
+
 
 
