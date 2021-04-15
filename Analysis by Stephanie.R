@@ -304,7 +304,66 @@ pvaluesz_normal <- data.frame(Sensor = sub(' ~ target', '', names(pz_normal)), p
 pvaluesz_normal# p-values from anova test in data frame
 
 
+set.seed(2021)
+
+
+# Training Data set 
+# Create training data set 
+training <- sample(1:dim(compact_data)[1], 4000, replace = FALSE) # randomly sample 4000 rows
+compact_datatrain <- compact_data[training,] # compact data training set 
+max_normaltrain <- max_normal[training,] # max normal training set 
+z_normaltrain <- z_normal[training,] # z normal traning data set 
+
+
+# Test data set 
+# Create test data set 
+testdata <- c(1:dim(compact_data)[1])[-training] # sample ramining 19 emails
+compact_datatest <- compact_data[testdata,] # compact data test set 
+max_normaltest <- max_normal[testdata,] # max normal test set 
+z_normaltest <- z_normal[testdata,] # z normal test data set 
+
+
 # Support Vector Machine
 
 # Week 5-7 for referrence
 
+library(e1071)
+
+# All features for compact data 
+compact_datatrain$target <- as.factor(compact_datatrain$target)
+svm1 <- svm(target~., data=compact_datatrain, method="C-classification", scale = FALSE, kernal="radial", cost=5)
+summary(svm1) # summary of svm
+svm1$SV # observation index and coefficients of the predictors for the support vectors
+prediction1 <- predict(svm1, compact_datatest)
+xtab1 <- table(compact_datatest$target, prediction1)
+xtab1 # Bad for walking a lot of mis-classifications 
+(244+171+237+230+342)/nrow(compact_datatest) # 64.6% (pretty bad)
+
+# All features for max normal data 
+max_normaltrain$target <- as.factor(max_normaltrain$target)
+svm2 <- svm(target~., data=max_normaltrain, method="C-classification", scale = FALSE, kernal="radial", cost=5)
+summary(svm2) # summary of svm
+svm2$SV # observation index and coefficients of the predictors for the support vectors
+prediction2 <- predict(svm2, max_normaltest)
+xtab2 <- table(max_normaltest$target, prediction2)
+xtab2 # Better than above, less mis-classifications especially for walking 
+(272+283+255+240+321)/nrow(max_normaltest) # 72.4% (better that compact data all features)
+
+# All features for max normal data 
+z_normaltrain$target <- as.factor(z_normaltrain$target)
+svm3 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="radial", cost=5)
+summary(svm3) # summary of svm
+svm3$SV # observation index and coefficients of the predictors for the support vectors
+prediction3 <- predict(svm3, z_normaltest)
+xtab3 <- table(z_normaltest$target, prediction3)
+xtab3 # Better than above, less mis-classifications especially for all of the targets
+(334+302+337+313+341)/nrow(z_normaltest) # 85.9% (better than compact data and max normal all features)
+
+# High Positive Correlation 
+
+# android.sensor.accelerometer.mean, android.sensor.gyroscope.mean android.sensor.gyroscope_uncalibrated.mean  and android.sensor.linear_acceleration.mean   
+# have strong positive correlation 
+
+# Based on boxplot differences and anova 
+
+# time, sound, game.rotation.vector, orientation and rotation.vector seem different maybe speed.mean
