@@ -26,6 +26,11 @@ compact_data$speed.mean <- third[,1]
 ```{r}
 write.csv(compact_data,"C:/Users/alber/Downloads/Classes/Stat 385/final project/compact_data.csv")
 ```
+# Save complete data into a csv
+```{r}
+complete_data <- cbind(first,second,third)
+write.csv(complete_data,"C:/Users/alber/Downloads/Classes/Stat 385/final project/complete_data.csv")
+```
 
 
 # Normalization Functions
@@ -51,15 +56,33 @@ max_normal[,-5] <- sapply(compact_data[,-5],max_normalization)
 z_normal <- compact_data
 z_normal[,-5] <- sapply(compact_data[,-5],z_normalization)
 ```
-# Save normalized data to csv
+
+```{r}
+max_complete <- complete_data
+max_complete[,-14] <- sapply(complete_data[,-14],max_normalization)
+
+z_complete <- complete_data
+z_complete[,-14] <- sapply(complete_data[,-14],z_normalization)
+```
+
+# Save normalized abridged data to csv
 ```{r}
 write.csv(max_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/max_normal.csv")
 write.csv(z_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/z_normal.csv")
 ```
+# Save normalized complete data to csv
+```{r}
+write.csv(max_complete,"C:/Users/alber/Downloads/Classes/Stat 385/final project/max_complete.csv")
+write.csv(z_complete,"C:/Users/alber/Downloads/Classes/Stat 385/final project/z_complete.csv")
+```
+
 # Load normalized data
 ```{r}
 z_normal<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/z_normal.csv",header=TRUE)
 max_normal<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/max_normal.csv",header=TRUE)
+
+z_complete<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/z_complete.csv",header=TRUE)
+max_complete<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/max_complete.csv",header=TRUE)
 ```
 
 
