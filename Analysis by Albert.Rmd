@@ -26,9 +26,21 @@ compact_data$speed.mean <- third[,1]
 ```{r}
 write.csv(compact_data,"C:/Users/alber/Downloads/Classes/Stat 385/final project/compact_data.csv")
 ```
+<<<<<<< HEAD
 
 
 # Normalization Functions
+=======
+# Save complete data into a csv
+```{r}
+complete_data <- cbind(first,second,third)
+write.csv(complete_data,"C:/Users/alber/Downloads/Classes/Stat 385/final project/complete_data.csv")
+```
+
+
+# Normalization Functions
+## Normalize by max or use z-score
+>>>>>>> 80a915b722098eb8c7ee66f89abec6773a491efe
 ```{r}
 max_normalization<-function(x)
 {
@@ -50,18 +62,49 @@ max_normal[,-5] <- sapply(compact_data[,-5],max_normalization)
 z_normal <- compact_data
 z_normal[,-5] <- sapply(compact_data[,-5],z_normalization)
 ```
+<<<<<<< HEAD
 # Save normalized data to csv
+=======
+
+```{r}
+max_complete <- complete_data
+max_complete[,-14] <- sapply(complete_data[,-14],max_normalization)
+
+z_complete <- complete_data
+z_complete[,-14] <- sapply(complete_data[,-14],z_normalization)
+```
+
+# Save normalized abridged data to csv
+>>>>>>> 80a915b722098eb8c7ee66f89abec6773a491efe
 ```{r}
 write.csv(max_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/max_normal.csv")
 write.csv(z_normal,"C:/Users/alber/Downloads/Classes/Stat 385/final project/z_normal.csv")
 ```
+<<<<<<< HEAD
 
+=======
+# Save normalized complete data to csv
+```{r}
+write.csv(max_complete,"C:/Users/alber/Downloads/Classes/Stat 385/final project/max_complete.csv")
+write.csv(z_complete,"C:/Users/alber/Downloads/Classes/Stat 385/final project/z_complete.csv")
+```
+
+# Load normalized data
+```{r}
+z_normal<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/z_normal.csv",header=TRUE)
+max_normal<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/max_normal.csv",header=TRUE)
+
+z_complete<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/z_complete.csv",header=TRUE)
+max_complete<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/max_complete.csv",header=TRUE)
+```
+>>>>>>> 80a915b722098eb8c7ee66f89abec6773a491efe
 
 
 ## Data set exploration
 
 ```{r}
 #boxplot(compact_data$android.sensor.game_rotation_vector.mean~compact_data$target)
+<<<<<<< HEAD
 kmeans.model<-kmeans(max_normal[1:4000,-5],5)
 table(kmeans.model$cluster,max_normal$target[1:4000])
 
@@ -71,9 +114,105 @@ table(kmeans.model2$cluster,z_normal$target[1:4000])
 ```{r}
 #plot(max_normal[,c(7:11)], col=kmeans.model$cluster, main="K-means clustering")
 #plot(z_normal[,c(9:11)], col=kmeans.model2$cluster, main="K-means clustering")
+=======
+#kmeans.model<-kmeans(max_normal[1:4000,-5],5)
+#table(kmeans.model$cluster,max_normal$target[1:4000])
+
 ```
-# accelerator doesn't seem very useful
+
+# Useful columns: 1,3,4,5,9,10,12,15,19,21,27,31,35,38
 ```{r}
-boxplot(compact_data[,2]~compact_data$target)
+#for (i in 1:13){boxplot(z_complete[,i]~z_normal$target)}
+#for (i in 15:38){boxplot(z_complete[,i]~z_normal$target)}
+```
+```{r}
+kmeans.model2<-kmeans(z_complete[1:4000,c(1,3,4,5,9,10,12,15,19,21,27,31,35,38)],5)
+table(kmeans.model2$cluster,z_complete$target[1:4000])
+table(z_complete$target[1:4000])
+table(kmeans.model2$cluster)
+```
+```{r}
+kmeans.model2<-kmeans(max_complete[1:4000,c(1,3,4,5,9,10,12,15,19,21,27,31,35,38)],5)
+table(kmeans.model2$cluster,max_complete$target[1:4000])
+table(max_complete$target[1:4000])
+table(kmeans.model2$cluster)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Variable manipulation
+```{r}
+z_complete<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/z_complete.csv",header=TRUE)
+z_complete$target <- as.factor(z_complete$target)
+#complete<-read.csv(file="C:/Users/alber/Downloads/Classes/Stat 385/final project/complete_data.csv",header=TRUE)
+#complete$target <- as.factor(complete$target)
+#max_complete$target <- as.factor(max_complete$target)
+```
+
+```{r}
+z_complete$LAM <- z_complete$android.sensor.linear_acceleration.mean^2
+z_complete$G <- z_complete$android.sensor.gyroscope.mean^2
+z_complete$SM <- z_complete$speed.mean^2
+
+
+```
+```{r}
+plot(z_complete$speed.mean,z_complete$android.sensor.accelerometer.std,col=z_complete$target)
+#plot(z_complete$LAM[z_complete$target=="Still"],z_complete$GC[z_complete$target=="Still"])
+legend("topright", legend=levels(z_complete$target), pch=1,col=z_complete$target)
+```
+
+# Decision Tree
+```{r}
+library(rpart)
+library(rpart.plot)
+training_data <- z_complete[1:4000,]
+test <- z_complete[4001:5893,]
+
+#training_data <- complete[1:4000,]
+#test <- complete[4001:5893,]
+```
+
+# Post-pruning
+```{r}
+treefit2<-rpart(target~., data=training_data, method="class", parms=list(split = "information"),control = rpart.control(minsplit=5, cp=0))
+bestcp <- treefit2$cptable[which.min(treefit2$cptable[,"xerror"]),"CP"]
+tree.pruned <- prune(treefit2, cp = bestcp)
+
+```
+```{r}
+pred <- predict(tree.pruned,newdata=test, type="class")
+truth<-test$target
+table(truth,pred)
+#table(pred)
+#table(truth)
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth,pred)[i,i]
+}
+correct/1893
+pred <- predict(tree.pruned,newdata=training_data, type="class")
+truth<-training_data$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth,pred)[i,i]
+}
+correct/4000
+>>>>>>> 80a915b722098eb8c7ee66f89abec6773a491efe
+```
+```{r}
+tree.pruned$variable.importance
 ```
 
