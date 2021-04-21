@@ -1,0 +1,436 @@
+---
+title: "Analysis by Stephanie (RMarkdown)"
+author: "Stephanie Boehm"
+date: "4/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# STAT 385 Final Project 
+
+### Load data sets
+```{r}
+setwd("C:/Users/Stephanie/Documents/STAT385/Final Project/Stat-385-final-project") # set my working directory 
+
+# The three data sets given for project
+first <- read.csv("Dfirst.csv") # read Dfirst data set 
+second <- read.csv("Dsecond.csv") # read Dsecond data set 
+third <- read.csv("Dthird.csv") # read Dthird data set 
+
+# Data set of nonoverlapping column names (abridged data)
+compact_data <- read.csv("compact_data.csv") # read compact_data data set (Created by Albert)
+
+# Normalized data based on compact data (unique variables, only includes their means)
+max_normal <- read.csv("max_normal.csv") # read max_normal data set (compact data normalized) (Created by Albert)
+z_normal <- read.csv("z_normal.csv") # read z_normal data set (compact data normalized) (Created by Albert)
+
+# Normalized data based on Dthird data set (all variables and their mean, min, max and std)
+max_complete <- read.csv("max_complete.csv") # read max_normal data set (compact data normalized) (Created by Albert)
+z_complete <- read.csv("z_complete.csv") # read z_normal data set (compact data normalized) (Created by Albert)
+```
+
+### Response variables of data sets
+```{r}
+# head(third) # first few rows of each column of third data set 
+levels(as.factor(third$target)) # levels of data set 
+```
+There are 5 levels, meaning 5 different responses for this data set. 
+
+### Edit data sets
+```{r}
+# target column moved to end of compact data frame and removed first column (first column was irrelevant, contained the number of each row)
+compact_data <- subset(compact_data, select=c(time:sound.mean, android.sensor.game_rotation_vector.mean:speed.mean, target))
+
+# target column moved to end of max normal data frame and removed first column (first column was irrelevant, contained the number of each row)
+max_normal <- subset(max_normal, select=c(time:sound.mean, android.sensor.game_rotation_vector.mean:speed.mean, target)) 
+
+# target column moved to end of z normal data frame and removed first column (first column was irrelevant, contained the number of each row)
+z_normal <- subset(z_normal, select=c(time:sound.mean, android.sensor.game_rotation_vector.mean:speed.mean, target))
+
+# target column moved to end of max complete data frame 
+max_complete <- subset(max_complete, select=c(time:sound.std, android.sensor.game_rotation_vector.mean:speed.std, target))
+
+# target column moved to end of z complete data frame 
+z_complete <- subset(z_complete, select=c(time:sound.std, android.sensor.game_rotation_vector.mean:speed.std, target))
+```
+
+### Set seed
+```{r}
+
+set.seed(2021) # set seed to get same sample each time 
+
+```
+For conveince for testing right now, so everyone sees the same results. 
+
+### Training data sets 
+```{r}
+# Create training data set 
+training <- sample(1:dim(compact_data)[1], 4000, replace = FALSE) # randomly sample 4000 rows
+compact_datatrain <- compact_data[training,] # compact data training set 
+max_normaltrain <- max_normal[training,] # max normal training set 
+z_normaltrain <- z_normal[training,] # z normal traning data set 
+max_completetrain <- max_complete[training,] # max complete training set 
+z_completetrain <- z_complete[training,] # z complete traning data set 
+
+```
+Contains a random sample of 4000 rows for training. 
+
+### Test data sets 
+```{r}
+# Create test data set 
+testdata <- c(1:dim(compact_data)[1])[-training] # sample remaining rows 
+compact_datatest <- compact_data[testdata,] # compact data test set 
+max_normaltest <- max_normal[testdata,] # max normal test set 
+z_normaltest <- z_normal[testdata,] # z normal test data set 
+max_completetest <- max_complete[testdata,] # max complete test set 
+z_completetest <- z_complete[testdata,] # z complete test data set 
+
+
+```
+Conatins a random sample of raimining 1893 rows for testing. 
+
+# Testing feature variables 
+
+### Correlation between features and targets.
+There is a high positive correlation between two variables when the correlation between them is closer to 1. A value closer to 0 suggests a weak relationship between the variables. A low correlation (-0.2 < x < 0.2) probably suggests that much of variation of the response variable (Y) is unexplained by the predictor (X), in which case, we should probably look for better explanatory variables. A high correlation probably suggests that much of variation of the response variable (Y) is explained by the predictor (X)
+
+```{r}
+# Dfirst data set 
+cor(first[1:(length(first)-1)], as.integer(factor(first$target)))
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean android.sensor.gyroscope.min, android.sensor.gyroscope.max, and android.sensor.gyroscope.std all have strong positive correlations.
+
+```{r}
+# Dsecond data set 
+cor(second[1:(length(second)-1)], as.integer(factor(second$target)))
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean android.sensor.gyroscope.min, android.sensor.gyroscope.max, android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean, android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max, android.sensor.gyroscope_uncalibrated.std, android.sensor.linear_acceleration.mean, android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, android.sensor.linear_acceleration.std, and  android.sensor.orientation.std all have strong positive correlations. 
+
+```{r}
+# Dthird data set 
+cor(third[1:(length(third)-1)], as.integer(factor(third$target)))
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean, android.sensor.gyroscope.min, android.sensor.gyroscope.max, android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean, android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max, android.sensor.gyroscope_uncalibrated.std, android.sensor.linear_acceleration.mean, android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, android.sensor.linear_acceleration.std, and android.sensor.orientation.std all have strong positive correlations. 
+
+```{r}
+# Compact data set 
+cor(compact_data[1:(length(compact_data)-1)], as.integer(factor(compact_data$target)))
+```
+The features android.sensor.accelerometer.mean, android.sensor.gyroscope.mean, android.sensor.gyroscope_uncalibrated.mean, and android.sensor.linear_acceleration.mean all have strong positive correlation 
+
+```{r}
+# Max Normal data set 
+cor(max_normal[1:(length(max_normal)-1)], as.integer(factor(max_normal$target)))
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.gyroscope.mean android.sensor.gyroscope_uncalibrated.mean, and android.sensor.linear_acceleration.mean all have strong positive correlation 
+
+```{r}
+# Z Normal data set 
+cor(z_normal[1:(length(z_normal)-1)], as.integer(factor(z_normal$target)))
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.gyroscope.mean android.sensor.gyroscope_uncalibrated.mean  and android.sensor.linear_acceleration.mean all have strong positive correlation 
+
+```{r}
+# Max normal complete 
+cor(max_complete[1:(length(max_complete)-1)], as.integer(factor(max_complete$target)))
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean, android.sensor.gyroscope.min, android.sensor.gyroscope.max, android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean, android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max, android.sensor.gyroscope_uncalibrated.std, android.sensor.linear_acceleration.mean, android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, android.sensor.linear_acceleration.std, and android.sensor.orientation.std all have strong positive correlations 
+
+```{r}
+# Z normal complete
+cor(z_complete[1:(length(z_complete)-1)], as.integer(factor(z_complete$target)))
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean, android.sensor.gyroscope.min, android.sensor.gyroscope.max, android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean, android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max, android.sensor.gyroscope_uncalibrated.std , android.sensor.linear_acceleration.mean, android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, android.sensor.linear_acceleration.std, and android.sensor.orientation.std all have strong positive correlations 
+
+
+### Boxplots of feature variables and responses 
+Box plots are useful as they provide a visual summary of the data enabling researchers to quickly identify mean values, the dispersion of the data set, and signs of skewness. They help to estimate a difference in variance amoungst responoses based on a feature variable. 
+```{r}
+# Boxplots 
+
+par(mfrow=c(2, 3))
+
+# Dfirst data set 
+for (i in 1:(length(first)-1)) {
+  boxplot(first[,i]~as.factor(first$target), main=names(first[i]))
+}
+
+# Dsecond data set 
+for (i in 1:(length(second)-1)) {
+  boxplot(second[,i]~as.factor(second$target), main=names(second[i]))
+}
+
+# Dthird data set 
+for (i in 1:(length(third)-1)) {
+  boxplot(third[,i]~as.factor(third$target), main=names(third[i]))
+}
+
+# Compact data set 
+for (i in 1:(length(compact_data)-1)) {
+  boxplot(compact_data[,i]~as.factor(compact_data$target), main=names(compact_data[i]))
+}
+
+# Max Normal data set 
+for (i in 1:(length(max_normal)-1)) {
+  boxplot(max_normal[,i]~as.factor(max_normal$target), main=names(max_normal[i]))
+}
+
+# Z Normal data set 
+for (i in 1:(length(z_normal)-1)) {
+  boxplot(z_normal[,i]~as.factor(z_normal$target), main=names(z_normal[i]))
+}
+
+# Max Normal Complete data set 
+for (i in 1:(length(max_complete)-1)) {
+  boxplot(max_complete[,i]~as.factor(max_complete$target), main=names(max_complete[i]))
+}
+
+# Z Normal  Complete data set 
+for (i in 1:(length(z_complete)-1)) {
+  boxplot(z_complete[,i]~as.factor(z_complete$target), main=names(z_complete[i]))
+}
+```
+
+
+### ANOVA testing for feature variables and responses 
+Analysis of variance (ANOVA) is a statistical technique that is used to check if the means of two or more groups are significantly different from each other. Three stars (or asterisks) represent a highly significant p-value. Consequently, a small p-value for the intercept and the slope indicates that we can reject the null hypothesis which allows us to conclude that there is a strong relationship between predictor and response. Typically, a p-value of 5% (.05) or less is a good cut-off point. 
+
+```{r}
+# Dfirst data set 
+first$target <- factor(first$target)
+formulae <- lapply(colnames(first)[2:ncol(first)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovafirst <- lapply(formulae, function(x) summary(aov(x, data = first)))
+names(anovafirst) <- format(formulae)
+anovafirst # summary of anova test for each column with target 
+pfirst <- unlist(lapply(anovafirst, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesfirst <- data.frame(Sensor = sub(' ~ target', '', names(pfirst)), pvalue = pfirst)
+pvaluesfirst # p-values from anova test in data frame 
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.min, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean, android.sensor.gyroscope.min, android.sensor.gyroscope.max, and android.sensor.gyroscope.std all have very small p-values . 
+
+```{r}
+# Dsecond data set 
+second$target <- factor(second$target)
+formulae <- lapply(colnames(second)[2:ncol(second)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovasecond <- lapply(formulae, function(x) summary(aov(x, data = second)))
+names(anovasecond) <- format(formulae)
+anovasecond # summary of anova test for each column with target
+psecond <- unlist(lapply(anovasecond, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluessecond <- data.frame(Sensor = sub(' ~ target', '', names(psecond)), pvalue = psecond)
+pvaluessecond # p-values from anova test in data frame
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.min, android.sensor.accelerometer.max,android.sensor.accelerometer.std, android.sensor.gyroscope.mean,android.sensor.gyroscope.min,android.sensor.gyroscope.max,android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean,android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max,android.sensor.gyroscope_uncalibrated.std,ndroid.sensor.linear_acceleration.mean, android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, and android.sensor.linear_acceleration.std all have very small p-vlaues
+
+```{r}
+# Dthird data set 
+third$target <- factor(third$target)
+formulae <- lapply(colnames(third)[2:ncol(third)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovathird <- lapply(formulae, function(x) summary(aov(x, data = third)))
+names(anovathird) <- format(formulae)
+anovathird # summary of anova test for each column with target
+pthird <- unlist(lapply(anovathird, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesthird <- data.frame(Sensor = sub(' ~ target', '', names(pthird)), pvalue = pthird)
+pvaluesthird # p-values from anova test in data frame
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.min, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean, android.sensor.gyroscope.min, android.sensor.gyroscope.max, android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean, android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max, android.sensor.gyroscope_uncalibrated.std, android.sensor.linear_acceleration.mean, android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, android.sensor.linear_acceleration.std, speed.mean+speed.min, and speed.max all have very small p-vlaues 
+
+```{r}
+# Compact data set 
+compact_data$target <- factor(compact_data$target)
+formulae <- lapply(colnames(compact_data)[2:ncol(compact_data)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovacompact_data <- lapply(formulae, function(x) summary(aov(x, data = compact_data)))
+names(anovacompact_data) <- format(formulae)
+anovacompact_data # summary of anova test for each column with target
+pcompact_data <- unlist(lapply(anovacompact_data, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluescompact_data <- data.frame(Sensor = sub(' ~ target', '', names(pcompact_data)), pvalue = pcompact_data)
+pvaluescompact_data # p-values from anova test in data frame
+
+```
+The features android.sensor.accelerometer.mean,android.sensor.gyroscope.mean,android.sensor.gyroscope_uncalibrated.mean,android.sensor.linear_acceleration.mean, and speed.mean all have very small p-values 
+
+```{r}
+# Max Normal data set 
+max_normal$target <- factor(max_normal$target)
+formulae <- lapply(colnames(max_normal)[2:ncol(max_normal)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovamax_normal <- lapply(formulae, function(x) summary(aov(x, data = max_normal)))
+names(anovamax_normal) <- format(formulae)
+anovamax_normal # summary of anova test for each column with target
+pmax_normal <- unlist(lapply(anovamax_normal, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesmax_normal <- data.frame(Sensor = sub(' ~ target', '', names(pmax_normal)), pvalue = pmax_normal)
+pvaluesmax_normal # p-values from anova test in data frame
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.gyroscope.mean, android.sensor.gyroscope_uncalibrated.mean, android.sensor.linear_acceleration.mean, and speed.mean all have very small p-values 
+
+```{r}
+# Z Normal data set 
+z_normal$target <- factor(z_normal$target)
+formulae <- lapply(colnames(z_normal)[2:ncol(z_normal)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovaz_normal <- lapply(formulae, function(x) summary(aov(x, data = z_normal)))
+names(anovaz_normal) <- format(formulae)
+anovaz_normal # summary of anova test for each column with target
+pz_normal <- unlist(lapply(anovaz_normal, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesz_normal <- data.frame(Sensor = sub(' ~ target', '', names(pz_normal)), pvalue = pz_normal)
+pvaluesz_normal# p-values from anova test in data frame
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.gyroscope.mean, android.sensor.gyroscope_uncalibrated.mean, android.sensor.linear_acceleration.mean, and speed.mean all have very small p-values 
+
+```{r}
+# Max Normal complete data set 
+max_complete$target <- factor(max_complete$target)
+formulae <- lapply(colnames(max_complete)[2:ncol(max_complete)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovamax_complete <- lapply(formulae, function(x) summary(aov(x, data = max_complete)))
+names(anovamax_complete) <- format(formulae)
+anovamax_complete # summary of anova test for each column with target
+pmax_complete <- unlist(lapply(anovamax_complete, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesmax_complete <- data.frame(Sensor = sub(' ~ target', '', names(pmax_complete)), pvalue = pmax_complete)
+pvaluesmax_complete # p-values from anova test in data frame
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.min, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean, android.sensor.gyroscope.min, android.sensor.gyroscope.max, android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean, android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max, android.sensor.gyroscope_uncalibrated.std, android.sensor.linear_acceleration.mean,android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, android.sensor.linear_acceleration.std, speed.mean, speed.min, and speed.max all have very small p-vlaues
+
+```{r}
+# Z Normal complete data set 
+z_complete$target <- factor(z_complete$target)
+formulae <- lapply(colnames(z_complete)[2:ncol(z_complete)-1], function(x) as.formula(paste0(x, " ~ target")))
+anovaz_complete <- lapply(formulae, function(x) summary(aov(x, data = z_complete)))
+names(anovaz_complete) <- format(formulae)
+anovaz_complete # summary of anova test for each column with target
+pz_complete <- unlist(lapply(anovaz_complete, function(x) x[[1]]$"Pr(>F)"[1]))
+pvaluesz_complete <- data.frame(Sensor = sub(' ~ target', '', names(pz_complete)), pvalue = pz_complete)
+pvaluesz_complete # p-values from anova test in data frame
+
+```
+The features android.sensor.accelerometer.mean, android.sensor.accelerometer.min, android.sensor.accelerometer.max, android.sensor.accelerometer.std, android.sensor.gyroscope.mean, android.sensor.gyroscope.min, android.sensor.gyroscope.max, android.sensor.gyroscope.std, android.sensor.gyroscope_uncalibrated.mean, android.sensor.gyroscope_uncalibrated.min, android.sensor.gyroscope_uncalibrated.max, android.sensor.gyroscope_uncalibrated.std, android.sensor.linear_acceleration.mean, android.sensor.linear_acceleration.min, android.sensor.linear_acceleration.max, android.sensor.linear_acceleration.std, speed.mean, speed.min, and speed.max all have very small p-vlaues 
+
+
+
+### Support Vector Machine 
+
+BEST ACCURACIES FROM ALL TESTING DONE FROM ANALYSIS BY STEPHANIE.R FILE
+```{r}
+library(e1071)
+
+# Change target variable to factor 
+
+z_completetrain$target <- as.factor(z_completetrain$target)
+
+z_normaltrain$target <- as.factor(z_normaltrain$target)
+
+```
+
+# All features for z normal complete data set using polynomial kernel 
+```{r}
+svm1 <- svm(target~., data=z_completetrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5) # polynomial kernel
+summary(svm1) # summary of svm
+#svm1$SV # observation index and coefficients of the predictors for the support vectors
+pred1 <- predict(svm1, z_completetest)
+truth1 <- z_completetest$target
+table(truth1, pred1) # Not that many mis-classified for each variable (only a few for each)
+# Accuracy for testing 
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth1, pred1)[i,i]
+}
+correct/nrow(z_completetest) # 90.97% accuracy 
+# Accuracy for training 
+pred1 <- predict(svm1, z_completetrain)
+truth1 <- z_completetrain$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth1, pred1)[i,i]
+}
+correct/nrow(z_completetrain) # 96.15% accuracy 
+```
+This is the best accuracy out of all svm testing for both test and train data sets. 
+
+# All features for z normal data set using polynomial kernel 
+```{r}
+svm2 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5) # polunomial kernel 
+summary(svm2) # summary of svm
+#svm2$SV # observation index and coefficients of the predictors for the support vectors
+pred2 <- predict(svm2, z_normaltest)
+truth2 <- z_normaltest$target
+table(truth2, pred2) # More mis-classified variables, but not so much for walking 
+# Accuracy for testing 
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth2, pred2)[i,i]
+}
+correct/nrow(z_normaltest) # 89.6% accuracy 
+# Accuracy for training 
+pred2 <- predict(svm2, z_normaltrain)
+truth2 <- z_normaltrain$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth2, pred2)[i,i]
+}
+correct/nrow(z_normaltrain) # 93.1% accuracy 
+
+```
+This is the second best accuracy out of all svm testing for both test and train data sets. 
+
+# All features for z complete data set using radial kernel 
+```{r}
+svm3 <- svm(target~., data=z_completetrain, method="C-classification", scale = FALSE, kernal="radial", cost=5)
+summary(svm3) # summary of svm
+#svm3$SV # observation index and coefficients of the predictors for the support vectors
+pred3 <- predict(svm3, z_completetest)
+truth3 <- z_completetest$target
+table(truth3, pred3) # More mis-classified throughout (for all variables)
+# Accuracy for testing 
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth3, pred3)[i,i]
+}
+correct/nrow(z_completetest) # 87.21% accuracy 
+# Accuracy for training 
+pred3 <- predict(svm3, z_completetrain)
+truth3 <- z_completetrain$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth3, pred3)[i,i]
+}
+correct/nrow(z_completetrain) # 92.45% accuracy 
+
+```
+This is the third best accuracy out of all svm testing for both test and train data sets. 
+
+# All features for z normal data set using radial kernel 
+```{r}
+svm4 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="radial", cost=5) # radial kernel 
+summary(svm4) # summary of svm
+#svm4$SV # observation index and coefficients of the predictors for the support vectors
+pred4 <- predict(svm4, z_normaltest)
+truth4 <- z_normaltest$target
+table(truth4, pred4) # More mis-classified variables, but not as much for walking 
+# Accuracy for testing 
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth4, pred4)[i,i]
+}
+correct/nrow(z_normaltest) # 85.9% accuracy 
+# Accuracy for training 
+pred4 <- predict(svm4, z_normaltrain)
+truth4 <- z_normaltrain$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth4, pred4)[i,i]
+}
+correct/nrow(z_normaltrain) # 88.8% accuracy 
+
+```
+This is the fourth best accuracy out of all svm testing for both test and train data sets.
+
