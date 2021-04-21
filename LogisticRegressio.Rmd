@@ -51,7 +51,7 @@ training1$target[training1$target == "Bus"] <- 1
 training1$target <- as.integer(training1$target)
 target <- as.integer(training1[,5])
 
-logisticbus <-glm(target~acceleration*sound+gyroscope*speed+sound*orientation*rotationvec*gamerotation+gamerotation*linacc+orientation, family="binomial")
+logisticbus <-glm(target~acceleration*sound+gyroscope*speed+sound*orientation*rotationvec*gamerotation+gamerotation*linacc+orientation*linacc*gyroscope, family="binomial")
 
 # train
 training1 <- training
@@ -61,7 +61,7 @@ training1$target[training1$target == "Train"] <- 1
 training1$target <- as.integer(training1$target)
 target <- as.integer(training1[,5])
 
-logistictrain <-glm(target~acceleration+gyroscope*speed*sound+linacc*sound+sound*speed*rotationvec+sound+orientation*sound, family="binomial") #repeat for all targets i guess
+logistictrain <-glm(target~acceleration+gyroscope*speed*sound+linacc*sound+sound*speed*rotationvec+sound+orientation*sound, family="binomial") 
 
 # car
 training1 <- training

@@ -495,7 +495,7 @@ training1$target[training1$target == <span class="hljs-string">"Bus"</span>] &lt
 training1$target &lt;- as.integer(training1$target)
 target &lt;- as.integer(training1[,<span class="hljs-number">5</span>])
 
-logisticbus &lt;-glm(target~acceleration*sound+gyroscope*speed+sound*orientation*rotationvec*gamerotation+gamerotation*linacc+orientation, family=<span class="hljs-string">"binomial"</span>)
+logisticbus &lt;-glm(target~acceleration*sound+gyroscope*speed+sound*orientation*rotationvec*gamerotation+gamerotation*linacc+orientation*linacc*gyroscope, family=<span class="hljs-string">"binomial"</span>)
 
 <span class="hljs-comment"># train</span>
 training1 &lt;- training
@@ -505,7 +505,7 @@ training1$target[training1$target == <span class="hljs-string">"Train"</span>] &
 training1$target &lt;- as.integer(training1$target)
 target &lt;- as.integer(training1[,<span class="hljs-number">5</span>])
 
-logistictrain &lt;-glm(target~acceleration+gyroscope*speed*sound+linacc*sound+sound*speed*rotationvec+sound+orientation*sound, family=<span class="hljs-string">"binomial"</span>) <span class="hljs-comment">#repeat for all targets i guess</span>
+logistictrain &lt;-glm(target~acceleration+gyroscope*speed*sound+linacc*sound+sound*speed*rotationvec+sound+orientation*sound, family=<span class="hljs-string">"binomial"</span>) 
 
 <span class="hljs-comment"># car</span>
 training1 &lt;- training
@@ -542,7 +542,7 @@ logisticwalking &lt;-glm(target~acceleration+gyroscope+linacc*sound+orientation*
 <pre class="r"><code class="hljs">with(summary(logisticwalking), <span class="hljs-number">1</span> - deviance/null.deviance) <span class="hljs-comment"># walking</span></code></pre>
 <pre><code class="hljs">## [1] 0.6930057</code></pre>
 <pre class="r"><code class="hljs">with(summary(logisticbus), <span class="hljs-number">1</span> - deviance/null.deviance) <span class="hljs-comment"># bus</span></code></pre>
-<pre><code class="hljs">## [1] 0.2271568</code></pre>
+<pre><code class="hljs">## [1] 0.302961</code></pre>
 <pre class="r"><code class="hljs">with(summary(logistictrain), <span class="hljs-number">1</span> - deviance/null.deviance) <span class="hljs-comment"># train</span></code></pre>
 <pre><code class="hljs">## [1] 0.3440545</code></pre>
 <pre class="r"><code class="hljs">with(summary(logisticstill), <span class="hljs-number">1</span> - deviance/null.deviance) <span class="hljs-comment"># still</span></code></pre>
@@ -586,7 +586,7 @@ predictions &lt;- c()
     correct &lt;- correct + <span class="hljs-number">100</span>
 }
 correct/length(predictions)</code></pre>
-<pre><code class="hljs">## [1] 71.42102</code></pre>
+<pre><code class="hljs">## [1] 71.79081</code></pre>
 </div>
 
 
