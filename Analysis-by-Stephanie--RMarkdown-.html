@@ -2505,22 +2505,62 @@ z_normaltrain$target &lt;- as.factor(z_normaltrain$target)</code></pre>
 </div>
 <div id="all-features-for-z-normal-complete-data-set-using-polynomial-kernel" class="section level1">
 <h1>All features for z normal complete data set using polynomial kernel</h1>
-<pre class="r"><code>svm1 &lt;- svm(target~., data=z_completetrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;polynomial&quot;, cost=40, degree=5) # polynomial kernel
+<pre class="r"><code># Choosing tuning parameters based on cross-validation
+tobj1 &lt;- tune(svm, target~., data= z_completetrain, kernel = &quot;polynomial&quot;, ranges = list(cost = c(0.001, 0.01, 0.1, 1, 10, 100), degree = c(3:6))) # takes a while to load
+summary(tobj1) # choose 100 as the cost parameter and 3  as the degree because it has the smallest error</code></pre>
+<pre><code>## 
+## Parameter tuning of &#39;svm&#39;:
+## 
+## - sampling method: 10-fold cross validation 
+## 
+## - best parameters:
+##  cost degree
+##   100      3
+## 
+## - best performance: 0.10725 
+## 
+## - Detailed performance results:
+##     cost degree   error dispersion
+## 1  1e-03      3 0.75425 0.02220642
+## 2  1e-02      3 0.58450 0.03086260
+## 3  1e-01      3 0.41350 0.02614596
+## 4  1e+00      3 0.21525 0.02212496
+## 5  1e+01      3 0.13375 0.01948112
+## 6  1e+02      3 0.10725 0.01547624
+## 7  1e-03      4 0.74275 0.02025703
+## 8  1e-02      4 0.60700 0.03653005
+## 9  1e-01      4 0.48275 0.02870951
+## 10 1e+00      4 0.30075 0.02153969
+## 11 1e+01      4 0.16550 0.02660931
+## 12 1e+02      4 0.12175 0.01349125
+## 13 1e-03      5 0.72650 0.03395667
+## 14 1e-02      5 0.61500 0.03157883
+## 15 1e-01      5 0.50075 0.03071034
+## 16 1e+00      5 0.36475 0.02225016
+## 17 1e+01      5 0.21675 0.02014013
+## 18 1e+02      5 0.13900 0.01845415
+## 19 1e-03      6 0.72425 0.02920355
+## 20 1e-02      6 0.61800 0.03045488
+## 21 1e-01      6 0.51425 0.02796451
+## 22 1e+00      6 0.41450 0.03386657
+## 23 1e+01      6 0.27175 0.01814486
+## 24 1e+02      6 0.17900 0.02183270</code></pre>
+<pre class="r"><code>svm1 &lt;- svm(target~., data=z_completetrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;polynomial&quot;, cost=100, degree=3) # polynomial kernel
 summary(svm1) # summary of svm</code></pre>
 <pre><code>## 
 ## Call:
 ## svm(formula = target ~ ., data = z_completetrain, method = &quot;C-classification&quot;, 
-##     kernal = &quot;polynomial&quot;, cost = 40, degree = 5, scale = FALSE)
+##     kernal = &quot;polynomial&quot;, cost = 100, degree = 3, scale = FALSE)
 ## 
 ## 
 ## Parameters:
 ##    SVM-Type:  C-classification 
 ##  SVM-Kernel:  radial 
-##        cost:  40 
+##        cost:  100 
 ## 
-## Number of Support Vectors:  1464
+## Number of Support Vectors:  1355
 ## 
-##  ( 323 237 307 247 350 )
+##  ( 296 242 292 217 308 )
 ## 
 ## 
 ## Number of Classes:  5 
@@ -2533,18 +2573,18 @@ truth1 &lt;- z_completetest$target
 table(truth1, pred1) # Not that many mis-classified for each variable (only a few for each)</code></pre>
 <pre><code>##          pred1
 ## truth1    Bus Car Still Train Walking
-##   Bus     346   4     2    21       8
-##   Car      23 340     6     7       5
-##   Still     7   3   367    14       6
-##   Train    10   8    24   326       5
-##   Walking  10   2     6     0     343</code></pre>
+##   Bus     345   4     2    20      10
+##   Car      22 346     3     5       5
+##   Still     5   2   369    14       7
+##   Train    11   6    14   338       4
+##   Walking   9   3     4     0     345</code></pre>
 <pre class="r"><code># Accuracy for testing 
 correct &lt;- 0
 for (i in 1:5) {
   correct &lt;- correct + table(truth1, pred1)[i,i]
 }
-correct/nrow(z_completetest) # 90.97% accuracy </code></pre>
-<pre><code>## [1] 0.9096672</code></pre>
+correct/nrow(z_completetest) # 92.08% accuracy </code></pre>
+<pre><code>## [1] 0.9207607</code></pre>
 <pre class="r"><code># Accuracy for training 
 pred1 &lt;- predict(svm1, z_completetrain)
 truth1 &lt;- z_completetrain$target
@@ -2552,81 +2592,50 @@ correct &lt;- 0
 for (i in 1:5) {
   correct &lt;- correct + table(truth1, pred1)[i,i]
 }
-correct/nrow(z_completetrain) # 96.15% accuracy </code></pre>
-<pre><code>## [1] 0.9615</code></pre>
+correct/nrow(z_completetrain) # 97.6% accuracy </code></pre>
+<pre><code>## [1] 0.976</code></pre>
 <p>This is the best accuracy out of all svm testing for both test and train data sets.</p>
-</div>
-<div id="all-features-for-z-normal-data-set-using-polynomial-kernel" class="section level1">
-<h1>All features for z normal data set using polynomial kernel</h1>
-<pre class="r"><code>svm2 &lt;- svm(target~., data=z_normaltrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;polynomial&quot;, cost=40, degree=5) # polunomial kernel 
-summary(svm2) # summary of svm</code></pre>
-<pre><code>## 
-## Call:
-## svm(formula = target ~ ., data = z_normaltrain, method = &quot;C-classification&quot;, 
-##     kernal = &quot;polynomial&quot;, cost = 40, degree = 5, scale = FALSE)
-## 
-## 
-## Parameters:
-##    SVM-Type:  C-classification 
-##  SVM-Kernel:  radial 
-##        cost:  40 
-## 
-## Number of Support Vectors:  1460
-## 
-##  ( 343 219 298 259 341 )
-## 
-## 
-## Number of Classes:  5 
-## 
-## Levels: 
-##  Bus Car Still Train Walking</code></pre>
-<pre class="r"><code>#svm2$SV # observation index and coefficients of the predictors for the support vectors
-pred2 &lt;- predict(svm2, z_normaltest)
-truth2 &lt;- z_normaltest$target
-table(truth2, pred2) # More mis-classified variables, but not so much for walking </code></pre>
-<pre><code>##          pred2
-## truth2    Bus Car Still Train Walking
-##   Bus     336  18     3    18       6
-##   Car      38 321    10    12       0
-##   Still    11   1   371    10       4
-##   Train    10   8    24   327       4
-##   Walking  11   1     6     2     341</code></pre>
-<pre class="r"><code># Accuracy for testing 
-correct &lt;- 0
-for (i in 1:5) {
-  correct &lt;- correct + table(truth2, pred2)[i,i]
-}
-correct/nrow(z_normaltest) # 89.6% accuracy </code></pre>
-<pre><code>## [1] 0.8959324</code></pre>
-<pre class="r"><code># Accuracy for training 
-pred2 &lt;- predict(svm2, z_normaltrain)
-truth2 &lt;- z_normaltrain$target
-correct &lt;- 0
-for (i in 1:5) {
-  correct &lt;- correct + table(truth2, pred2)[i,i]
-}
-correct/nrow(z_normaltrain) # 93.1% accuracy </code></pre>
-<pre><code>## [1] 0.93125</code></pre>
-<p>This is the second best accuracy out of all svm testing for both test and train data sets.</p>
 </div>
 <div id="all-features-for-z-complete-data-set-using-radial-kernel" class="section level1">
 <h1>All features for z complete data set using radial kernel</h1>
-<pre class="r"><code>svm3 &lt;- svm(target~., data=z_completetrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;radial&quot;, cost=5)
-summary(svm3) # summary of svm</code></pre>
+<pre class="r"><code># Choosing tuning parameters based on cross-validation
+tobj2 &lt;- tune(svm, target~., data= z_completetrain, kernel = &quot;radial&quot;, ranges = list(cost = c(0.001, 0.01,0.1, 1, 10, 100))) # takes a while to load
+summary(tobj2) # choose 100 as the cost parameter because it has the smallest error </code></pre>
+<pre><code>## 
+## Parameter tuning of &#39;svm&#39;:
+## 
+## - sampling method: 10-fold cross validation 
+## 
+## - best parameters:
+##  cost
+##   100
+## 
+## - best performance: 0.08375 
+## 
+## - Detailed performance results:
+##    cost   error dispersion
+## 1 1e-03 0.77575 0.08586205
+## 2 1e-02 0.37925 0.03636333
+## 3 1e-01 0.22250 0.02054805
+## 4 1e+00 0.16100 0.01671659
+## 5 1e+01 0.10450 0.01899561
+## 6 1e+02 0.08375 0.01380670</code></pre>
+<pre class="r"><code>svm2 &lt;- svm(target~., data=z_completetrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;radial&quot;, cost=100)
+summary(svm2) # summary of svm</code></pre>
 <pre><code>## 
 ## Call:
 ## svm(formula = target ~ ., data = z_completetrain, method = &quot;C-classification&quot;, 
-##     kernal = &quot;radial&quot;, cost = 5, scale = FALSE)
+##     kernal = &quot;radial&quot;, cost = 100, scale = FALSE)
 ## 
 ## 
 ## Parameters:
 ##    SVM-Type:  C-classification 
 ##  SVM-Kernel:  radial 
-##        cost:  5 
+##        cost:  100 
 ## 
-## Number of Support Vectors:  1772
+## Number of Support Vectors:  1355
 ## 
-##  ( 390 280 359 297 446 )
+##  ( 296 242 292 217 308 )
 ## 
 ## 
 ## Number of Classes:  5 
@@ -2634,52 +2643,167 @@ summary(svm3) # summary of svm</code></pre>
 ## Levels: 
 ##  Bus Car Still Train Walking</code></pre>
 <pre class="r"><code>#svm3$SV # observation index and coefficients of the predictors for the support vectors
-pred3 &lt;- predict(svm3, z_completetest)
-truth3 &lt;- z_completetest$target
-table(truth3, pred3) # More mis-classified throughout (for all variables)</code></pre>
-<pre><code>##          pred3
-## truth3    Bus Car Still Train Walking
-##   Bus     321   5    21    24      10
-##   Car      31 329     8     9       4
-##   Still     5   4   336    46       6
-##   Train    11   7    30   321       4
-##   Walking   8   2     4     3     344</code></pre>
+pred2 &lt;- predict(svm2, z_completetest)
+truth2 &lt;- z_completetest$target
+table(truth2, pred2) # More mis-classified throughout (for all variables)</code></pre>
+<pre><code>##          pred2
+## truth2    Bus Car Still Train Walking
+##   Bus     345   4     2    20      10
+##   Car      22 346     3     5       5
+##   Still     5   2   369    14       7
+##   Train    11   6    14   338       4
+##   Walking   9   3     4     0     345</code></pre>
 <pre class="r"><code># Accuracy for testing 
 correct &lt;- 0
 for (i in 1:5) {
-  correct &lt;- correct + table(truth3, pred3)[i,i]
+  correct &lt;- correct + table(truth2, pred2)[i,i]
 }
-correct/nrow(z_completetest) # 87.21% accuracy </code></pre>
-<pre><code>## [1] 0.8721606</code></pre>
+correct/nrow(z_completetest) # 92.08% accuracy </code></pre>
+<pre><code>## [1] 0.9207607</code></pre>
 <pre class="r"><code># Accuracy for training 
-pred3 &lt;- predict(svm3, z_completetrain)
-truth3 &lt;- z_completetrain$target
+pred2 &lt;- predict(svm2, z_completetrain)
+truth2 &lt;- z_completetrain$target
 correct &lt;- 0
 for (i in 1:5) {
-  correct &lt;- correct + table(truth3, pred3)[i,i]
+  correct &lt;- correct + table(truth2, pred2)[i,i]
 }
-correct/nrow(z_completetrain) # 92.45% accuracy </code></pre>
-<pre><code>## [1] 0.9245</code></pre>
-<p>This is the third best accuracy out of all svm testing for both test and train data sets.</p>
+correct/nrow(z_completetrain) # 97.6% accuracy </code></pre>
+<pre><code>## [1] 0.976</code></pre>
+<p>This is the first best accuracy out of all svm testing for both test and train data sets.</p>
 </div>
-<div id="all-features-for-z-normal-data-set-using-radial-kernel" class="section level1">
-<h1>All features for z normal data set using radial kernel</h1>
-<pre class="r"><code>svm4 &lt;- svm(target~., data=z_normaltrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;radial&quot;, cost=5) # radial kernel 
-summary(svm4) # summary of svm</code></pre>
+<div id="all-features-for-z-normal-data-set-using-polynomial-kernel" class="section level1">
+<h1>All features for z normal data set using polynomial kernel</h1>
+<pre class="r"><code># Choosing tuning parameters based on cross-validation
+tobj3 &lt;- tune(svm, target~., data= z_normaltrain, kernel = &quot;polynomial&quot;, ranges = list(cost = c(0.001, 0.01, 0.1, 1, 10, 100), degree = c(3:6))) # takes a while to load
+summary(tobj3) # choose 100 as the cost parameter and 3  as the degree because it has the smallest error</code></pre>
+<pre><code>## 
+## Parameter tuning of &#39;svm&#39;:
+## 
+## - sampling method: 10-fold cross validation 
+## 
+## - best parameters:
+##  cost degree
+##   100      3
+## 
+## - best performance: 0.12575 
+## 
+## - Detailed performance results:
+##     cost degree   error dispersion
+## 1  1e-03      3 0.72075 0.03450141
+## 2  1e-02      3 0.56650 0.02105548
+## 3  1e-01      3 0.42450 0.01950071
+## 4  1e+00      3 0.22175 0.01047815
+## 5  1e+01      3 0.15325 0.01443616
+## 6  1e+02      3 0.12575 0.01968678
+## 7  1e-03      4 0.72050 0.01763047
+## 8  1e-02      4 0.57775 0.01713711
+## 9  1e-01      4 0.46950 0.02329759
+## 10 1e+00      4 0.29700 0.01337494
+## 11 1e+01      4 0.17700 0.01147461
+## 12 1e+02      4 0.13350 0.01500926
+## 13 1e-03      5 0.69225 0.01169342
+## 14 1e-02      5 0.57875 0.01491876
+## 15 1e-01      5 0.49050 0.02229225
+## 16 1e+00      5 0.35475 0.01749802
+## 17 1e+01      5 0.21250 0.01518406
+## 18 1e+02      5 0.14475 0.01574316
+## 19 1e-03      6 0.67200 0.01097978
+## 20 1e-02      6 0.57800 0.01342676
+## 21 1e-01      6 0.49650 0.02180087
+## 22 1e+00      6 0.40350 0.01822696
+## 23 1e+01      6 0.27525 0.01920106
+## 24 1e+02      6 0.18325 0.01364480</code></pre>
+<pre class="r"><code>svm3 &lt;- svm(target~., data=z_normaltrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;polynomial&quot;, cost=100, degree=3) # polunomial kernel 
+summary(svm3) # summary of svm</code></pre>
 <pre><code>## 
 ## Call:
 ## svm(formula = target ~ ., data = z_normaltrain, method = &quot;C-classification&quot;, 
-##     kernal = &quot;radial&quot;, cost = 5, scale = FALSE)
+##     kernal = &quot;polynomial&quot;, cost = 100, degree = 3, scale = FALSE)
 ## 
 ## 
 ## Parameters:
 ##    SVM-Type:  C-classification 
 ##  SVM-Kernel:  radial 
-##        cost:  5 
+##        cost:  100 
 ## 
-## Number of Support Vectors:  1803
+## Number of Support Vectors:  1343
 ## 
-##  ( 444 233 363 329 434 )
+##  ( 317 207 271 246 302 )
+## 
+## 
+## Number of Classes:  5 
+## 
+## Levels: 
+##  Bus Car Still Train Walking</code></pre>
+<pre class="r"><code>#svm2$SV # observation index and coefficients of the predictors for the support vectors
+pred3 &lt;- predict(svm3, z_normaltest)
+truth3 &lt;- z_normaltest$target
+table(truth3, pred3) # More mis-classified variables, but not so much for walking </code></pre>
+<pre><code>##          pred3
+## truth3    Bus Car Still Train Walking
+##   Bus     340  15     3    16       7
+##   Car      36 327     9     9       0
+##   Still     1   4   379    10       3
+##   Train    13   8    19   330       3
+##   Walking  13   1     7     1     339</code></pre>
+<pre class="r"><code># Accuracy for testing 
+correct &lt;- 0
+for (i in 1:5) {
+  correct &lt;- correct + table(truth3, pred3)[i,i]
+}
+correct/nrow(z_normaltest) # 90.59% accuracy </code></pre>
+<pre><code>## [1] 0.9059694</code></pre>
+<pre class="r"><code># Accuracy for training 
+pred3 &lt;- predict(svm3, z_normaltrain)
+truth3 &lt;- z_normaltrain$target
+correct &lt;- 0
+for (i in 1:5) {
+  correct &lt;- correct + table(truth3, pred3)[i,i]
+}
+correct/nrow(z_normaltrain) # 95% accuracy </code></pre>
+<pre><code>## [1] 0.95</code></pre>
+<p>This is the second best accuracy out of all svm testing for both test and train data sets.</p>
+</div>
+<div id="all-features-for-z-normal-data-set-using-radial-kernel" class="section level1">
+<h1>All features for z normal data set using radial kernel</h1>
+<pre class="r"><code># Choosing tuning parameters based on cross-validation
+tobj4 &lt;- tune(svm, target~., data= z_normaltrain, kernel = &quot;radial&quot;, ranges = list(cost = c(0.001, 0.01,0.1, 1, 10, 100))) # takes a while to load
+summary(tobj4) # choose 100 as the cost parameter because it has the smallest error </code></pre>
+<pre><code>## 
+## Parameter tuning of &#39;svm&#39;:
+## 
+## - sampling method: 10-fold cross validation 
+## 
+## - best parameters:
+##  cost
+##   100
+## 
+## - best performance: 0.10075 
+## 
+## - Detailed performance results:
+##    cost   error dispersion
+## 1 1e-03 0.79450 0.05839045
+## 2 1e-02 0.39700 0.01584649
+## 3 1e-01 0.24625 0.01501157
+## 4 1e+00 0.17375 0.01303041
+## 5 1e+01 0.12750 0.01224745
+## 6 1e+02 0.10075 0.01086853</code></pre>
+<pre class="r"><code>svm4 &lt;- svm(target~., data=z_normaltrain, method=&quot;C-classification&quot;, scale = FALSE, kernal=&quot;radial&quot;, cost=100) # radial kernel 
+summary(svm4) # summary of svm</code></pre>
+<pre><code>## 
+## Call:
+## svm(formula = target ~ ., data = z_normaltrain, method = &quot;C-classification&quot;, 
+##     kernal = &quot;radial&quot;, cost = 100, scale = FALSE)
+## 
+## 
+## Parameters:
+##    SVM-Type:  C-classification 
+##  SVM-Kernel:  radial 
+##        cost:  100 
+## 
+## Number of Support Vectors:  1343
+## 
+##  ( 317 207 271 246 302 )
 ## 
 ## 
 ## Number of Classes:  5 
@@ -2692,18 +2816,18 @@ truth4 &lt;- z_normaltest$target
 table(truth4, pred4) # More mis-classified variables, but not as much for walking </code></pre>
 <pre><code>##          pred4
 ## truth4    Bus Car Still Train Walking
-##   Bus     334  14     1    23       9
-##   Car      52 302     9    18       0
-##   Still    15   1   337    40       4
-##   Train    13   8    33   313       6
-##   Walking  11   0     5     4     341</code></pre>
+##   Bus     340  15     3    16       7
+##   Car      36 327     9     9       0
+##   Still     1   4   379    10       3
+##   Train    13   8    19   330       3
+##   Walking  13   1     7     1     339</code></pre>
 <pre class="r"><code># Accuracy for testing 
 correct &lt;- 0
 for (i in 1:5) {
   correct &lt;- correct + table(truth4, pred4)[i,i]
 }
-correct/nrow(z_normaltest) # 85.9% accuracy </code></pre>
-<pre><code>## [1] 0.8594823</code></pre>
+correct/nrow(z_normaltest) # 90.6% accuracy </code></pre>
+<pre><code>## [1] 0.9059694</code></pre>
 <pre class="r"><code># Accuracy for training 
 pred4 &lt;- predict(svm4, z_normaltrain)
 truth4 &lt;- z_normaltrain$target
@@ -2711,9 +2835,9 @@ correct &lt;- 0
 for (i in 1:5) {
   correct &lt;- correct + table(truth4, pred4)[i,i]
 }
-correct/nrow(z_normaltrain) # 88.8% accuracy </code></pre>
-<pre><code>## [1] 0.88825</code></pre>
-<p>This is the fourth best accuracy out of all svm testing for both test and train data sets.</p>
+correct/nrow(z_normaltrain) # 95% accuracy </code></pre>
+<pre><code>## [1] 0.95</code></pre>
+<p>This is the second best accuracy out of all svm testing for both test and train data sets.</p>
 </div>
 
 

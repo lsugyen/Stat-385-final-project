@@ -333,7 +333,10 @@ z_normaltrain$target <- as.factor(z_normaltrain$target)
 
 # All features for z normal complete data set using polynomial kernel 
 ```{r}
-svm1 <- svm(target~., data=z_completetrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5) # polynomial kernel
+# Choosing tuning parameters based on cross-validation
+tobj1 <- tune(svm, target~., data= z_completetrain, kernel = "polynomial", ranges = list(cost = c(0.001, 0.01, 0.1, 1, 10, 100), degree = c(3:6))) # takes a while to load
+summary(tobj1) # choose 100 as the cost parameter and 3  as the degree because it has the smallest error
+svm1 <- svm(target~., data=z_completetrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=100, degree=3) # polynomial kernel
 summary(svm1) # summary of svm
 #svm1$SV # observation index and coefficients of the predictors for the support vectors
 pred1 <- predict(svm1, z_completetest)
@@ -344,7 +347,7 @@ correct <- 0
 for (i in 1:5) {
   correct <- correct + table(truth1, pred1)[i,i]
 }
-correct/nrow(z_completetest) # 90.97% accuracy 
+correct/nrow(z_completetest) # 92.08% accuracy 
 # Accuracy for training 
 pred1 <- predict(svm1, z_completetrain)
 truth1 <- z_completetrain$target
@@ -352,65 +355,75 @@ correct <- 0
 for (i in 1:5) {
   correct <- correct + table(truth1, pred1)[i,i]
 }
-correct/nrow(z_completetrain) # 96.15% accuracy 
+correct/nrow(z_completetrain) # 97.6% accuracy 
+
 ```
 This is the best accuracy out of all svm testing for both test and train data sets. 
 
-# All features for z normal data set using polynomial kernel 
+# All features for z complete data set using radial kernel 
 ```{r}
-svm2 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5) # polunomial kernel 
+# Choosing tuning parameters based on cross-validation
+tobj2 <- tune(svm, target~., data= z_completetrain, kernel = "radial", ranges = list(cost = c(0.001, 0.01,0.1, 1, 10, 100))) # takes a while to load
+summary(tobj2) # choose 100 as the cost parameter because it has the smallest error 
+svm2 <- svm(target~., data=z_completetrain, method="C-classification", scale = FALSE, kernal="radial", cost=100)
 summary(svm2) # summary of svm
-#svm2$SV # observation index and coefficients of the predictors for the support vectors
-pred2 <- predict(svm2, z_normaltest)
-truth2 <- z_normaltest$target
-table(truth2, pred2) # More mis-classified variables, but not so much for walking 
+#svm3$SV # observation index and coefficients of the predictors for the support vectors
+pred2 <- predict(svm2, z_completetest)
+truth2 <- z_completetest$target
+table(truth2, pred2) # More mis-classified throughout (for all variables)
 # Accuracy for testing 
 correct <- 0
 for (i in 1:5) {
   correct <- correct + table(truth2, pred2)[i,i]
 }
-correct/nrow(z_normaltest) # 89.6% accuracy 
+correct/nrow(z_completetest) # 92.08% accuracy 
 # Accuracy for training 
-pred2 <- predict(svm2, z_normaltrain)
-truth2 <- z_normaltrain$target
+pred2 <- predict(svm2, z_completetrain)
+truth2 <- z_completetrain$target
 correct <- 0
 for (i in 1:5) {
   correct <- correct + table(truth2, pred2)[i,i]
 }
-correct/nrow(z_normaltrain) # 93.1% accuracy 
+correct/nrow(z_completetrain) # 97.6% accuracy 
+
+```
+This is the first best accuracy out of all svm testing for both test and train data sets. 
+
+# All features for z normal data set using polynomial kernel 
+```{r}
+# Choosing tuning parameters based on cross-validation
+tobj3 <- tune(svm, target~., data= z_normaltrain, kernel = "polynomial", ranges = list(cost = c(0.001, 0.01, 0.1, 1, 10, 100), degree = c(3:6))) # takes a while to load
+summary(tobj3) # choose 100 as the cost parameter and 3  as the degree because it has the smallest error
+svm3 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=100, degree=3) # polunomial kernel 
+summary(svm3) # summary of svm
+#svm2$SV # observation index and coefficients of the predictors for the support vectors
+pred3 <- predict(svm3, z_normaltest)
+truth3 <- z_normaltest$target
+table(truth3, pred3) # More mis-classified variables, but not so much for walking 
+# Accuracy for testing 
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth3, pred3)[i,i]
+}
+correct/nrow(z_normaltest) # 90.59% accuracy 
+# Accuracy for training 
+pred3 <- predict(svm3, z_normaltrain)
+truth3 <- z_normaltrain$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth3, pred3)[i,i]
+}
+correct/nrow(z_normaltrain) # 95% accuracy 
 
 ```
 This is the second best accuracy out of all svm testing for both test and train data sets. 
 
-# All features for z complete data set using radial kernel 
-```{r}
-svm3 <- svm(target~., data=z_completetrain, method="C-classification", scale = FALSE, kernal="radial", cost=5)
-summary(svm3) # summary of svm
-#svm3$SV # observation index and coefficients of the predictors for the support vectors
-pred3 <- predict(svm3, z_completetest)
-truth3 <- z_completetest$target
-table(truth3, pred3) # More mis-classified throughout (for all variables)
-# Accuracy for testing 
-correct <- 0
-for (i in 1:5) {
-  correct <- correct + table(truth3, pred3)[i,i]
-}
-correct/nrow(z_completetest) # 87.21% accuracy 
-# Accuracy for training 
-pred3 <- predict(svm3, z_completetrain)
-truth3 <- z_completetrain$target
-correct <- 0
-for (i in 1:5) {
-  correct <- correct + table(truth3, pred3)[i,i]
-}
-correct/nrow(z_completetrain) # 92.45% accuracy 
-
-```
-This is the third best accuracy out of all svm testing for both test and train data sets. 
-
 # All features for z normal data set using radial kernel 
 ```{r}
-svm4 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="radial", cost=5) # radial kernel 
+# Choosing tuning parameters based on cross-validation
+tobj4 <- tune(svm, target~., data= z_normaltrain, kernel = "radial", ranges = list(cost = c(0.001, 0.01,0.1, 1, 10, 100))) # takes a while to load
+summary(tobj4) # choose 100 as the cost parameter because it has the smallest error 
+svm4 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="radial", cost=100) # radial kernel 
 summary(svm4) # summary of svm
 #svm4$SV # observation index and coefficients of the predictors for the support vectors
 pred4 <- predict(svm4, z_normaltest)
@@ -421,7 +434,7 @@ correct <- 0
 for (i in 1:5) {
   correct <- correct + table(truth4, pred4)[i,i]
 }
-correct/nrow(z_normaltest) # 85.9% accuracy 
+correct/nrow(z_normaltest) # 90.6% accuracy 
 # Accuracy for training 
 pred4 <- predict(svm4, z_normaltrain)
 truth4 <- z_normaltrain$target
@@ -429,8 +442,8 @@ correct <- 0
 for (i in 1:5) {
   correct <- correct + table(truth4, pred4)[i,i]
 }
-correct/nrow(z_normaltrain) # 88.8% accuracy 
+correct/nrow(z_normaltrain) # 95% accuracy 
 
 ```
-This is the fourth best accuracy out of all svm testing for both test and train data sets.
+This is the second best accuracy out of all svm testing for both test and train data sets.
 
