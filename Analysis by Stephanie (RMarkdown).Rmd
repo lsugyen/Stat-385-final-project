@@ -317,9 +317,9 @@ The features android.sensor.accelerometer.mean, android.sensor.accelerometer.min
 
 
 
-### Support Vector Machine 
+Support Vector Machine 
 
-BEST ACCURACIES FROM ALL TESTING DONE FROM ANALYSIS BY STEPHANIE.R FILE
+### BEST ACCURACIES FROM ALL TESTING DONE FROM ANALYSIS BY STEPHANIE.R FILE
 ```{r}
 library(e1071)
 
@@ -356,6 +356,15 @@ for (i in 1:5) {
   correct <- correct + table(truth1, pred1)[i,i]
 }
 correct/nrow(z_completetrain) # 97.6% accuracy 
+
+# compute decision values and probabilities:
+x <- subset(z_completetrain, select = -target)
+pred <- predict(svm1, x, decision.values = TRUE)
+attr(pred, "decision.values")[1:37,]
+
+# visualize (classes by color, SV by crosses):
+plot(cmdscale(dist(z_completetrain[,-38])),col = as.integer(z_completetrain[,38]), pch = c("o","+")[1:4000 %in% svm1$index + 1])
+legend("bottomright", legend=c("Bus", "Car", "Still", "Train", "Walking"), col=1:5, pch=19)
 
 ```
 This is the best accuracy out of all svm testing for both test and train data sets. 
