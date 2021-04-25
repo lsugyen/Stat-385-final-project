@@ -456,3 +456,31 @@ correct/nrow(z_normaltrain) # 95% accuracy
 ```
 This is the second best accuracy out of all svm testing for both test and train data sets.
 
+# Important Sensors 
+```{r}
+# Choosing tuning parameters based on cross-validation
+tobj5 <- tune(svm, target~., data= z_completetrain, kernel = "polynomial", ranges = list(cost = c(0.001, 0.01, 0.1, 1, 10, 100), degree = c(3:6))) # takes a while to load
+summary(tobj5) # choose 100 as the cost parameter and 3  as the degree because it has the smallest error
+svm5 <- svm(as.formula(paste(colnames(z_completetrain)[38], "~", paste(colnames(z_completetrain)[c(2, 6, 10, 22, 26, 30, 34)], collapse = "+"), sep = "")), data=z_completetrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=100, degree=3) # polynomial kernel
+summary(svm5) # summary of svm
+#svm5$SV # observation index and coefficients of the predictors for the support vectors
+pred5 <- predict(svm5, z_completetest)
+truth5 <- z_completetest$target
+table(truth5, pred5) # Not that many mis-classified for each variable (only a few for each)
+# Accuracy for testing 
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth5, pred5)[i,i]
+}
+correct/nrow(z_completetest) # 87.32% accuracy 
+# Accuracy for training 
+pred5 <- predict(svm5, z_completetrain)
+truth5 <- z_completetrain$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth5, pred5)[i,i]
+}
+correct/nrow(z_completetrain) # 90.3% accuracy 
+
+```
+
