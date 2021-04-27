@@ -536,6 +536,10 @@ pvaluesz_normalthird # p-values from anova test in data frame
 # Support Vector Machine
 
 # Week 5-7 for reference
+# Lectures 4, 5 and 6
+# R codes Week 5 Part 2 and Week 7
+# Labs 5 and 6
+# Homework 3 
 
 # kernel types polynomial, radial (data set is nonlinear)
 
@@ -544,17 +548,7 @@ library(e1071)
 
 # BEST ACCURACIES FROM ALL TESTING DONE FROM BELOW 
 
-# All features for max normal data 
-max_normaltrain$target <- as.factor(max_normaltrain$target)
-svm2 <- svm(target~., data=max_normaltrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5)
-summary(svm2) # summary of svm
-svm2$SV # observation index and coefficients of the predictors for the support vectors
-prediction2 <- predict(svm2, max_normaltest)
-xtab2 <- table(max_normaltest$target, prediction2)
-xtab2 # Many misclassified 
-(283+282+290+269+326)/nrow(max_normaltest) # 76.6% (better than radial)
-
-# All features for max normal data 
+# All features for z normal data 
 z_normaltrain$target <- as.factor(z_normaltrain$target)
 svm3 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="radial", cost=5)
 summary(svm3) # summary of svm
@@ -564,7 +558,7 @@ xtab3 <- table(z_normaltest$target, prediction3)
 xtab3 # Better than above, less mis-classifications especially for all of the targets
 (334+302+337+313+341)/nrow(z_normaltest) # 85.9% (better than compact data and max normal all features)
 
-# All features for max normal data 
+# All features for z normal data 
 z_normaltrain$target <- as.factor(z_normaltrain$target)
 svm3 <- svm(target~., data=z_normaltrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5)
 summary(svm3) # summary of svm
@@ -573,25 +567,6 @@ prediction3 <- predict(svm3, z_normaltest)
 xtab3 <- table(z_normaltest$target, prediction3)
 xtab3 # Better than above, less mis-classifications especially for all of the targets
 (336+321+371+327+341)/nrow(z_normaltest) # 89.4% (BEST SO FAR!!!)
-
-# Small p-vlaue for anova 
-svm12 <- svm(target~android.sensor.accelerometer.mean+android.sensor.accelerometer.min+android.sensor.accelerometer.max+android.sensor.accelerometer.std+android.sensor.gyroscope.mean+android.sensor.gyroscope.min+android.sensor.gyroscope.max+android.sensor.gyroscope.std+android.sensor.gyroscope_uncalibrated.mean+android.sensor.gyroscope_uncalibrated.min+android.sensor.gyroscope_uncalibrated.max+android.sensor.gyroscope_uncalibrated.std+android.sensor.linear_acceleration.mean+android.sensor.linear_acceleration.min+android.sensor.linear_acceleration.max+android.sensor.linear_acceleration.std+speed.mean+speed.min+speed.max, data=third_datatrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5)
-summary(svm12) # summary of svm
-svm12$SV # observation index and coefficients of the predictors for the support vectors
-prediction12 <- predict(svm12, thirdtest)
-xtab12 <- table(thirdtest$target, prediction12)
-xtab12 # A decent amount are misclassified for each section 
-(249+273+370+265+305)/nrow(thirdtest) # 77.2% (better than radial)
-
-# All features for third data 
-max_normalthirdtrain$target <- as.factor(max_normalthirdtrain$target)
-svm13 <- svm(target~., data=max_normalthirdtrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5)
-summary(svm13) # summary of svm
-svm13$SV # observation index and coefficients of the predictors for the support vectors
-prediction13 <- predict(svm13, max_normalthirdtest)
-xtab13 <- table(max_normalthirdtest$target, prediction13)
-xtab13 # many mis-classifications 
-(277+304+304+277+319)/nrow(max_normalthirdtest) # 78.2% (=better than radial)
 
 # All features for third data 
 z_normalthirdtrain$target <- as.factor(z_normalthirdtrain$target)
@@ -612,15 +587,6 @@ prediction16 <- predict(svm16, z_normalthirdtest)
 xtab16 <- table(z_normalthirdtest$target, prediction16)
 xtab16 # not that many are mis classified  
 (346+340+367+326+343)/nrow(z_normalthirdtest) # 90.9% (BEST OVERALL!!)
-
-# Small p-vlaue for anova 
-svm18 <- svm(target~android.sensor.accelerometer.mean+android.sensor.accelerometer.min+android.sensor.accelerometer.max+android.sensor.accelerometer.std+android.sensor.gyroscope.mean+android.sensor.gyroscope.min+android.sensor.gyroscope.max+android.sensor.gyroscope.std+android.sensor.gyroscope_uncalibrated.mean+android.sensor.gyroscope_uncalibrated.min+android.sensor.gyroscope_uncalibrated.max+android.sensor.gyroscope_uncalibrated.std+android.sensor.linear_acceleration.mean+android.sensor.linear_acceleration.min+android.sensor.linear_acceleration.max+android.sensor.linear_acceleration.std+speed.mean+speed.min+speed.max, data=z_normalthirdtrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=40, degree=5)
-summary(svm18) # summary of svm
-svm18$SV # observation index and coefficients of the predictors for the support vectors
-prediction18 <- predict(svm18, z_normalthirdtest)
-xtab18 <- table(z_normalthirdtest$target, prediction18)
-xtab18 # A decent amount are misclassified for each section 
-(237+279+372+253+310)/nrow(z_normalthirdtest) # 76.6% (better than radial)
 
 
 
@@ -1003,3 +969,29 @@ prediction18 <- predict(svm18, z_normalthirdtest)
 xtab18 <- table(z_normalthirdtest$target, prediction18)
 xtab18 # A decent amount are misclassified for each section 
 (237+279+372+253+310)/nrow(z_normalthirdtest) # 76.6% (better than radial)
+
+# Important Sensors 
+```{r}
+# Choosing tuning parameters based on cross-validation
+tobj5 <- tune(svm, target~., data= z_completetrain, kernel = "polynomial", ranges = list(cost = c(0.001, 0.01, 0.1, 1, 10, 100), degree = c(3:6))) # takes a while to load
+summary(tobj5) # choose 100 as the cost parameter and 3  as the degree because it has the smallest error
+svm5 <- svm(as.formula(paste(colnames(z_completetrain)[38], "~", paste(colnames(z_completetrain)[c(2, 6, 10, 22, 26, 30, 34)], collapse = "+"), sep = "")), data=z_completetrain, method="C-classification", scale = FALSE, kernal="polynomial", cost=100, degree=3) # polynomial kernel
+summary(svm5) # summary of svm
+#svm5$SV # observation index and coefficients of the predictors for the support vectors
+pred5 <- predict(svm5, z_completetest)
+truth5 <- z_completetest$target
+table(truth5, pred5) # Not that many mis-classified for each variable (only a few for each)
+# Accuracy for testing 
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth5, pred5)[i,i]
+}
+correct/nrow(z_completetest) # 87.32% accuracy 
+# Accuracy for training 
+pred5 <- predict(svm5, z_completetrain)
+truth5 <- z_completetrain$target
+correct <- 0
+for (i in 1:5) {
+  correct <- correct + table(truth5, pred5)[i,i]
+}
+correct/nrow(z_completetrain) # 90.3% accuracy 
