@@ -185,9 +185,7 @@ treefit2<-rpart(target~., data=training_data, method="class", parms=list(split =
 bestcp <- treefit2$cptable[which.min(treefit2$cptable[,"xerror"]),"CP"]
 tree.pruned <- prune(treefit2, cp = bestcp)
 ```
-```{r}
 
-```
 
 
 ```{r}
